@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simple Chat</title>
+  <!-- Add the necessary CSS for the chat UI -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="msger.css">
+</head>
+<body>
+  <section class="msger">
+    <!-- ...Existing code for the chat UI... -->
+
+    <main class="msger-chat" id="chat-container">
+      <!-- Existing code for displaying messages will be removed from here -->
+    </main>
+
+    <form class="msger-inputarea">
+      <input type="text" class="msger-input" placeholder="Enter your message...">
+      <button type="submit" class="msger-send-btn">Send</button>
+    </form>
+  </section>
+
+  <!-- Add the necessary JavaScript for the chat UI -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+  <script src="msger.js"></script>
+
+  <script>
+    const userMsg = [];
+    const editMsg = [];
+    const chatMsg = [];
+
+    async function postJSON(data) {
+      try {
+        // Store the user's message in the userMsg array
+        userMsg.push(data.message);
+
+        const response = await fetch("http://localhost:3000/engle", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            userMsg,
+            editMsg,
+            chatMsg,
+          }),
+        });
+
+        const result = await response.json();
+        console.log("Success:", result);
+
+        // Store the editor, chatbot's response in the chatMsg array
+        editMsg.push(result.assistant_1);
+        chatMsg.push(result.assistant_2);
+
+        // Display the bot's response in the chat UI
+        displayBotMessage(result.assistant);
+      } catch (error) {
+        console.error("Failure:", error);
+      }
+    }
+
+    function displayUserMessage(message) {
+      const chatContainer = document.getElementById("chat-container");
+
+      const userMsgDiv = document.createElement("div");
+      userMsgDiv.classList.add("msg");
+      userMsgDiv.classList.add("right-msg");
+
+      userMsgDiv.innerHTML = `
+        <div class="msg-img" style="background-image: url(https://image.flaticon.com/icons/svg/145/145867.svg)"></div>
+        <div class="msg-bubble">
+          <div class="msg-info">
+            <div class="msg-info-name">You</div>
+            <div class="msg-info-time">${getCurrentTime()}</div>
+          </div>
+          <div class="msg-text">${message}</div>
+        </div>
+      `;
+
+      chatContainer.appendChild(userMsgDiv);
+    }
+
+    function displayBotMessage(message) {
+      const chatContainer = document.getElementById("chat-container");
+
+      const botMsgDiv = document.createElement("div");
+      botMsgDiv.classList.add("msg");
+      botMsgDiv.classList.add("left-msg");
+
+      botMsgDiv.innerHTML = `
+        <div class="msg-img" style="background-image: url(https://image.flaticon.com/icons/svg/327/327779.svg)"></div>
+        <div class="msg-bubble">
+          <div class="msg-info">
+            <div class="msg-info-name">BOT</div>
+            <div class="msg-info-time">${getCurrentTime()}</div>
+          </div>
+          <div class="msg-text">${message}</div>
+        </div>
+      `;
+
+      chatContainer.appendChild(botMsgDiv);
+    }
+
+    function getCurrentTime() {
+      const now = new Date();
+      const hours = now.getHours().toString().padStart(2, "0");
+      const minutes = now.getMinutes().toString().padStart(2, "0");
+      return `${hours}:${minutes}`;
+    }
+
+    document.querySelector(".msger-send-btn").addEventListener("click", function (event) {
+      event.preventDefault();
+      const input = document.querySelector(".msger-input");
+      const message = input.value;
+      const data = { username: "Sajad", message: message };
+
+      // Clear the input field after capturing the message
+      input.value = "";
+
+      // Send the user's message to the backend and handle the response
+      postJSON(data);
+
+      // Display the user's message in the chat UI instantly
+      displayUserMessage(message);
+    });
+  </script>
+</body>
+</html>
