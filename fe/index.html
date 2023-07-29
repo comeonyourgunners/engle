@@ -7,6 +7,9 @@
   <!-- Add the necessary CSS for the chat UI -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="msger.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Dosis:wght@500&display=swap" rel="stylesheet">
 </head>
 <body>
   <section class="msger">
@@ -51,17 +54,19 @@
         const result = await response.json();
         console.log("Success:", result);
 
-        // Store the editor, chatbot's response in the chatMsg array
+        // Store the editor(assistant_2), chatbot(assistant_1)'s response in the chatMsg array
         editMsg.push(result.assistant_1);
         chatMsg.push(result.assistant_2);
 
         // Display the bot's response in the chat UI
-        displayBotMessage(result.assistant);
+        displayEditorMessage(result.assistant_1);
+        displayBotMessage(result.assistant_2);
       } catch (error) {
         console.error("Failure:", error);
       }
     }
 
+    // for user
     function displayUserMessage(message) {
       const chatContainer = document.getElementById("chat-container");
 
@@ -81,8 +86,10 @@
       `;
 
       chatContainer.appendChild(userMsgDiv);
+      scrollChatToBottom(); // Scroll to the bottom after adding the message
     }
 
+    // for chatbot
     function displayBotMessage(message) {
       const chatContainer = document.getElementById("chat-container");
 
@@ -102,6 +109,30 @@
       `;
 
       chatContainer.appendChild(botMsgDiv);
+      scrollChatToBottom(); // Scroll to the bottom after adding the message
+    }
+
+    // for editor
+    function displayEditorMessage(message) {
+      const chatContainer = document.getElementById("chat-container");
+
+      const editorMsgDiv = document.createElement("div");
+      editorMsgDiv.classList.add("msg");
+      editorMsgDiv.classList.add("right-msg");
+
+      editorMsgDiv.innerHTML = `
+        <div class="msg-img" style="background-image: url(https://image.flaticon.com/icons/svg/327/327779.svg)"></div>
+        <div class="msg-bubble">
+          <div class="msg-info">
+            <div class="msg-info-name">BOT</div>
+            <div class="msg-info-time">${getCurrentTime()}</div>
+          </div>
+          <div class="msg-text">${message}</div>
+        </div>
+      `;
+
+      chatContainer.appendChild(editorMsgDiv);
+      scrollChatToBottom(); // Scroll to the bottom after adding the message
     }
 
     function getCurrentTime() {
@@ -125,6 +156,50 @@
 
       // Display the user's message in the chat UI instantly
       displayUserMessage(message);
+    });
+
+    function scrollChatToBottom() {
+      const chatBox = document.querySelector(".msger-chat");
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    // Function to check if the chat is already at the bottom
+    function isChatAtBottom() {
+      const chatBox = document.querySelector(".msger-chat");
+      return chatBox.scrollHeight - chatBox.clientHeight <= chatBox.scrollTop + 1;
+    }
+
+    function handleIncomingMessage() {
+      const chatBox = document.querySelector(".msger-chat");
+      const isAutoScrollEnabled = chatBox.classList.contains("auto-scroll");
+
+      // Check if the chat is already at the bottom before adding new messages
+      const shouldScrollToBottom = isAutoScrollEnabled && isChatAtBottom();
+
+      // Code to handle adding new messages to the chat box
+      // Add your logic here to append the new messages to the chat box
+
+      // After adding the new messages, scroll to the bottom if needed
+      if (shouldScrollToBottom) {
+        scrollChatToBottom();
+      }
+    }
+
+    // You should call the handleIncomingMessage() function whenever a new message is received
+    // For demonstration purposes, here's an example of how you can simulate an incoming message after 1 second
+    setTimeout(() => {
+      handleIncomingMessage();
+    }, 1000);
+
+    // Enable auto-scrolling when the user scrolls to the bottom manually
+    const chatBox = document.querySelector(".msger-chat");
+    chatBox.addEventListener("scroll", () => {
+      const isAtBottom = isChatAtBottom();
+      if (isAtBottom) {
+        chatBox.classList.add("auto-scroll");
+      } else {
+        chatBox.classList.remove("auto-scroll");
+      }
     });
   </script>
 </body>

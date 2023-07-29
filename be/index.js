@@ -1,5 +1,5 @@
 // ChatGPT API
-const apiKey = "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"
+const apiKey = "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"
 const { Configuration, OpenAIApi } = require("openai");
 const configuration = new Configuration({
     apiKey: apiKey,
@@ -19,9 +19,9 @@ app.use(express.urlencoded({ extended: true })) // for parsing application/x-www
 
 app.post('/engle', async function (req, res) {
     let {userMsg, editMsg, chatMsg} = req.body;
-    console.log(userMsg);
-    console.log(editMsg);
-    console.log(chatMsg);
+    // console.log(userMsg);
+    // console.log(editMsg);
+    // console.log(chatMsg);
 
     let editor = [
         {"role": "system", "content": "You will be provided with statements, and your task is to convert them to standard English."},
@@ -30,19 +30,20 @@ app.post('/engle', async function (req, res) {
     ]
 
     let chatbot = [
-        {"role": "system", "content": "You are cashier for 1-Street Dinner restraunt."},
-        {"role": "user", "content": "You are cashier for 1-Street Dinner restraunt."},
-        {"role": "assistant", "content": "Hi, This is 1-Street Dinner. Do you have a reservation?"}
+        {"role": "system", "content": "You are cashier for 1-Street Dinner restaurant."},
+        {"role": "user", "content": "You are cashier for 1-Street Dinner restaurant."},
+        {"role": "assistant", "content": "Welcome to 1-Street Dinner! How can I assist you today?"}
     ]
 
-    // Push message
+    //Push message
     while (userMsg.length != 0 || editMsg.length != 0) {
         if (userMsg.length != 0) {
+            um = userMsg.shift()
             editor.push(
-                JSON.parse('{"role": "user", "content": "'+String(userMsg.shift()).replace(/\n/g,"")+'"}')
+                JSON.parse('{"role": "user", "content": "'+String(um).replace(/\n/g,"")+'"}')
             )
             chatbot.push(
-                JSON.parse('{"role": "user", "content": "'+String(userMsg.shift()).replace(/\n/g,"")+'"}')
+                JSON.parse('{"role": "user", "content": "'+String(um).replace(/\n/g,"")+'"}')
             )
         }
         if (editMsg.length != 0) {
@@ -55,16 +56,19 @@ app.post('/engle', async function (req, res) {
         }
     }
 
+    console.log(editor);
+    console.log(chatbot);
+
     const completion_1 = await openai.createChatCompletion({
         model: "gpt-3.5-turbo",
-        max_tokens: 100,
+        max_tokens: 128,
         temperature: 0,
         messages: editor,
     });
 
     const completion_2 = await openai.createChatCompletion({
         model: "gpt-3.5-turbo",
-        max_tokens: 100,
+        max_tokens: 128,
         temperature: 0.5,
         messages: chatbot,
     });
